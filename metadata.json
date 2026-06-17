@@ -1,0 +1,6 @@
+{
+  "name": "FALLEN",
+  "description": "Ad-free Android music streaming player with multiple sources including YouTube, YouTube Music, and JioSaavn with offline downloads and advanced audio search.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
