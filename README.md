@@ -2,6 +2,10 @@
 
 <br />
 
+<img src="banner.png" alt="Fallan — between heaven, the void, and ruin" width="100%" />
+
+<br />
+
 ```
 ░▒▓ F A L L A N ▓▒░
 
@@ -12,10 +16,14 @@
 ██║     ██║  ██║███████╗███████╗██║  ██║██║ ╚███║
 ╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚══╝
 
-· · ─────────── ✦ ─────────── · ·
+· · ───────────── ✦ ───────────── · ·
 ✧  BETWEEN HEAVEN  ·  THE VOID  ·  AND RUIN  ✧
-⛧  ༒  ⛧  ⸸  ⛧  ༒  ⛧
+⛧  ༢  ⛧  ⺸  ⛧  ༢  ⛧
 ```
+
+<sub>vibe coded with Claude Sonnet 4.6 · Anthropic · 2026</sub>
+
+<br />
 
 **A music streaming app for Android — powered by JioSaavn**
 
