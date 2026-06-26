@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.api.FallenApi
+import com.example.player.PlaybackManager
 import com.example.data.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -52,6 +53,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val audioQuality = MutableStateFlow("High") // Auto, Low, High
     val crossfadeDuration = MutableStateFlow(0) // 0-10s
     val defaultSourceConfig = MutableStateFlow("JioSaavn")
+    val visualizerSensitivity = MutableStateFlow(1.0f) // 0.5f to 2.5f scale multiplier
+    val visualizerBarDensity = MutableStateFlow(28) // 12 to 48 bar count
+    val playerVisualType = MutableStateFlow("Square") // "Square" or "CAVA"
+    val lyricsFontSize = MutableStateFlow(20) // default font size for lyrics (14 to 32)
+    val lyricsSpeed = MutableStateFlow(1.0f) // speed multiplier (0.5 to 2.0)
+
+    // Canvas background
+    val canvasMode = MutableStateFlow("none") // "none", "album", "image", "video"
+    val canvasImageUri = MutableStateFlow("") // local URI string or empty
+    val canvasVideoUri = MutableStateFlow("") // local URI string or empty
+    val canvasBlurRadius = MutableStateFlow(15f) // 0f–25f
 
     // Home Screen Trends
     val trendingSongsState = MutableStateFlow<UiState<List<SongModel>>>(UiState.Idle)
@@ -68,7 +80,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         // Load initial states from SharedPreferences
         val savedSourceName = prefs.getString("active_source", MusicSource.JIO_SAAVN.name) ?: MusicSource.JIO_SAAVN.name
-        activeSource.value = try { MusicSource.valueOf(savedSourceName) } catch (e: Exception) { MusicSource.JIO_SAAVN }
+        val loadedSource = try { MusicSource.valueOf(savedSourceName) } catch (e: Exception) { MusicSource.JIO_SAAVN }
+        activeSource.value = if (loadedSource == MusicSource.YOUTUBE || loadedSource == MusicSource.YOUTUBE_MUSIC) MusicSource.JIO_SAAVN else loadedSource
         
         amoledTheme.value = prefs.getBoolean("theme_amoled", false)
         lightTheme.value = prefs.getBoolean("theme_light", false)
@@ -82,11 +95,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         audioQuality.value = prefs.getString("audio_quality", "High") ?: "High"
         crossfadeDuration.value = prefs.getInt("crossfade", 0)
         defaultSourceConfig.value = prefs.getString("default_source_cfg", "JioSaavn") ?: "JioSaavn"
+        visualizerSensitivity.value = prefs.getFloat("visualizer_sensitivity", 1.0f)
+        visualizerBarDensity.value = prefs.getInt("visualizer_bar_density", 28)
+        playerVisualType.value = prefs.getString("player_visual_type", "Square") ?: "Square"
+        lyricsFontSize.value = prefs.getInt("lyrics_font_size", 20)
+        lyricsSpeed.value = prefs.getFloat("lyrics_speed", 1.0f)
+
+        canvasMode.value = prefs.getString("canvas_mode", "none") ?: "none"
+        canvasImageUri.value = prefs.getString("canvas_image_uri", "") ?: ""
+        canvasVideoUri.value = prefs.getString("canvas_video_uri", "") ?: ""
+        canvasBlurRadius.value = prefs.getFloat("canvas_blur_radius", 15f)
         
         // Load recent searches string list
         val recentStr = prefs.getString("recent_searches_csv", "") ?: ""
         if (recentStr.isNotEmpty()) {
             recentSearches.value = recentStr.split(",")
+        }
+
+        // Load last played song from database history as default state
+        viewModelScope.launch {
+            try {
+                val recent = withContext(Dispatchers.IO) {
+                    dao.getRecentlyPlayedFlow().firstOrNull() ?: emptyList()
+                }
+                if (recent.isNotEmpty() && PlaybackManager.currentSong.value == null) {
+                    val songs = recent.map { it.toSongModel() }
+                    PlaybackManager.setQueue(songs, 0)
+                    PlaybackManager.currentSong.value = songs[0]
+                    Log.d("MainViewModel", "Loaded last played song from history: ${songs[0].title}")
+                }
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "Error loading recently played song: ${e.message}")
+            }
         }
 
         // Trigger loading home screen trends as first action
@@ -197,6 +237,89 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         prefs.edit().putInt("crossfade", duration).apply()
     }
 
+    fun setVisualizerSensitivity(sensitivity: Float) {
+        visualizerSensitivity.value = sensitivity
+        prefs.edit().putFloat("visualizer_sensitivity", sensitivity).apply()
+    }
+
+    fun setVisualizerBarDensity(density: Int) {
+        visualizerBarDensity.value = density
+        prefs.edit().putInt("visualizer_bar_density", density).apply()
+    }
+
+    fun setPlayerVisualType(type: String) {
+        playerVisualType.value = type
+        prefs.edit().putString("player_visual_type", type).apply()
+    }
+
+    fun setLyricsFontSize(size: Int) {
+        lyricsFontSize.value = size
+        prefs.edit().putInt("lyrics_font_size", size).apply()
+    }
+
+    fun setLyricsSpeed(speed: Float) {
+        lyricsSpeed.value = speed
+        prefs.edit().putFloat("lyrics_speed", speed).apply()
+    }
+
+    fun setCanvasMode(mode: String) { canvasMode.value = mode; prefs.edit().putString("canvas_mode", mode).apply() }
+    fun setCanvasImageUri(uri: String) {
+        canvasImageUri.value = uri
+        prefs.edit().putString("canvas_image_uri", uri).apply()
+    }
+    fun setCanvasVideoUri(uri: String) {
+        canvasVideoUri.value = uri
+        prefs.edit().putString("canvas_video_uri", uri).apply()
+    }
+
+    fun importCanvasImage(uri: android.net.Uri) {
+        viewModelScope.launch {
+            val context = getApplication<Application>()
+            val localPath = withContext(Dispatchers.IO) {
+                try {
+                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                        val file = java.io.File(context.filesDir, "canvas_image.jpg")
+                        java.io.FileOutputStream(file).use { outputStream ->
+                            inputStream.copyTo(outputStream)
+                        }
+                        file.absolutePath
+                    }
+                } catch (e: Exception) {
+                    Log.e("MainViewModel", "Error copying image background: ${e.message}", e)
+                    null
+                }
+            }
+            if (localPath != null) {
+                setCanvasImageUri(localPath)
+            }
+        }
+    }
+
+    fun importCanvasVideo(uri: android.net.Uri) {
+        viewModelScope.launch {
+            val context = getApplication<Application>()
+            val localPath = withContext(Dispatchers.IO) {
+                try {
+                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                        val file = java.io.File(context.filesDir, "canvas_video.mp4")
+                        java.io.FileOutputStream(file).use { outputStream ->
+                            inputStream.copyTo(outputStream)
+                        }
+                        file.absolutePath
+                    }
+                } catch (e: Exception) {
+                    Log.e("MainViewModel", "Error copying video background: ${e.message}", e)
+                    null
+                }
+            }
+            if (localPath != null) {
+                setCanvasVideoUri(localPath)
+            }
+        }
+    }
+    fun updateCanvasBlurRadius(r: Float) { canvasBlurRadius.value = r }
+    fun setCanvasBlurRadius(r: Float) { canvasBlurRadius.value = r; prefs.edit().putFloat("canvas_blur_radius", r).apply() }
+
     // Trending Loader
     fun reloadTrendingNow() {
         viewModelScope.launch {
@@ -205,8 +328,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val songs = withContext(Dispatchers.IO) {
                     when (activeSource.value) {
                         MusicSource.JIO_SAAVN -> FallenApi.fetchJioSaavnCharts()
-                        MusicSource.YOUTUBE -> FallenApi.searchYoutube("Top Trending Global Music Hits", false)
-                        MusicSource.YOUTUBE_MUSIC -> FallenApi.searchYoutube("Top Songs", true)
+                        else -> emptyList()
                     }
                 }
                 trendingSongsState.value = UiState.Success(songs)
@@ -295,8 +417,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val musicList = withContext(Dispatchers.IO) {
                     when (activeSource.value) {
                         MusicSource.JIO_SAAVN -> FallenApi.searchJioSaavn(query)
-                        MusicSource.YOUTUBE -> FallenApi.searchYoutube(query, false)
-                        MusicSource.YOUTUBE_MUSIC -> FallenApi.searchYoutube(query, true)
+                        else -> emptyList()
                     }
                 }
                 searchState.value = UiState.Success(musicList)

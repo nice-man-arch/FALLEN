@@ -77,8 +77,6 @@ object FallenDownloadManager {
                 if (streamUrl == null) {
                     if (song.source == MusicSource.JIO_SAAVN) {
                         streamUrl = FallenApi.fetchJioSaavnSongDetails(song.id)?.streamUrl
-                    } else if (song.source == MusicSource.YOUTUBE || song.source == MusicSource.YOUTUBE_MUSIC) {
-                        streamUrl = FallenApi.resolveYoutubeStreamUrl(song.id)
                     }
                 }
 

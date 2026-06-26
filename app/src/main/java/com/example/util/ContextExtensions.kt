@@ -4,9 +4,9 @@ import android.content.Context
 import android.os.Build
 
 fun Context.getSafeAttributionContext(): Context {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         try {
-            this.createAttributionContext("default")
+            this.createAttributionContext("music_playback")
         } catch (e: Exception) {
             this
         }
