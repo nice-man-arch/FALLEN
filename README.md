@@ -923,3 +923,24 @@ app/src/main/java/com/aistudio/fallan/streams/
 <div align="center">
   <sub>🎵 Built with Kotlin + Jetpack Compose · Streamed via JioSaavn</sub>
 </div>>
+
+<br />
+
+```
+░▒▓ F A L L A N ▓▒░
+
+███████╗ █████╗ ██╗ ██╗ █████╗ ███╗ ██╗
+██╔════╝██╔══██╗██║ ██║ ██╔══██╗████╗ ██║
+█████╗ ███████║██║ ██║ ███████║██╔██╗██║
+██╔══╝ ██╔══██║██║ ██║ ██╔══██║██║╚████║
+██║ ██║ ██║███████╗███████╗██║ ██║██║ ╚███║
+╚═╝ ╚═╝ ╚═╝╚══════╝╚══════╝╚═╝ ╚═╝╚═╝ ╚══╝
+
+· · ───────────── ✦ ───────────── · ·
+✧ BETWEEN HEAVEN · THE VOID · AND RUIN ✧
+⛧ ༢ ⛧ ⺸ ⛧ ༢ ⛧
+```
+
+<sub>vibe coded with Claude Sonnet 4.6 · Anthropic · 2026</sub>
+
+<br />
