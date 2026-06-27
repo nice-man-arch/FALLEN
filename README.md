@@ -156,22 +156,7 @@ app/src/main/java/com/aistudio/fallan/streams/
 
 <br />
 
-<img src="banner.png" alt="Fallan — between heaven, the void, and ruin" width="100%" />
-
-<br />
-
-<sub>vibe coded with Claude Sonnet 4.6 · Anthropic · 2026</sub>
-
-<br />
-
-**A music streaming app for Android — powered by JioSaavn** 🎵
-
-![Android](https://img.shields.io/badge/Android-3DDC84?style=flat&logo=android&logoColor=white)
-![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=flat&logo=kotlin&logoColor=white)
-![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=flat&logo=jetpackcompose&logoColor=white)
-![Status](https://img.shields.io/badge/status-active%20development-orange?style=flat)
-
-                                       ░▒▓ F A L L A N ▓▒░
+                                           ░▒▓ F A L L A N ▓▒░
                 
                              ███████╗  █████╗  ██╗      ██╗       █████╗  ███╗  ██╗
                              ██╔════╝ ██╔══██╗ ██║      ██║      ██╔══██╗ ████╗ ██║
