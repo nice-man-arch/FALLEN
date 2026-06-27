@@ -156,7 +156,7 @@ app/src/main/java/com/aistudio/fallan/streams/
 
 <br />
 
-                                           ░▒▓ F A L L A N ▓▒░
+                                            ░▒▓ F A L L A N ▓▒░
                 
                              ███████╗  █████╗  ██╗      ██╗       █████╗  ███╗  ██╗
                              ██╔════╝ ██╔══██╗ ██║      ██║      ██╔══██╗ ████╗ ██║
