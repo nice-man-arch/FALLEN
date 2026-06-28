@@ -6,7 +6,7 @@
 
 <br />
 
-<sub>vibe coded with Claude Sonnet 4.6 · Anthropic · 2026</sub>
+<sub>vibe coded with Claude Sonnet 4.6 and gemini 3.5 · 2026</sub>
 
 <br />
 
